@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:integration="http://www.springframework.org/schema/integration"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="com.pranav.examples" />
+
+	<integration:channel id="inputChannel" />
+
+	<integration:channel id="outputChannel" />
+
+	<integration:service-activator id="printServiceActivator"
+		input-channel="outputChannel" ref="printService" method="printValue" />
+
+	<integration:publish-subscribe-channel
+		id="myErrorChannel" />
+
+	<integration:chain id="inputQueue" input-channel="inputChannel"
+		order="1" output-channel="outputChannel">
+		<integration:header-enricher>
+			<integration:header name="FOO" value="BAR" />
+		</integration:header-enricher>
+
+		<integration:header-enricher id="maxi-enricher">
+			<integration:priority value="10" />
+			<integration:error-channel ref="myErrorChannel" />
+			<integration:correlation-id value="APP_OWN_ID" />
+			<integration:header name="SRC_SYSTEM" value="BBG" />
+		</integration:header-enricher>
+	</integration:chain>
+	
+</beans>

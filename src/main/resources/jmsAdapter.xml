@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:integration="http://www.springframework.org/schema/integration"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:intjms="http://www.springframework.org/schema/integration/jms"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+	http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+	http://www.springframework.org/schema/integration/jms http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd">
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="com.pranav.examples" />
+
+	<integration:channel id="inputChannel" />
+
+	<intjms:inbound-channel-adapter id="positionsJmsAdapter"
+		connection-factory="connectionFactory" destination="positionsQueue"
+		channel="inputChannel" auto-startup="true">
+		<integration:poller fixed-rate="1000" />
+	</intjms:inbound-channel-adapter>
+
+	<!-- destination on ActiveMQ -->
+	<bean id="positionsQueue" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg value="POSITIONS_QUEUE" />
+	</bean>
+	<!-- connection factory for ActiveMQ -->
+	<bean name="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL">
+			<value>tcp://localhost:61616</value>
+		</property>
+	</bean>
+
+	<integration:service-activator id="printServiceActivator"
+		input-channel="inputChannel" ref="printService" method="printPayload" />
+
+
+</beans>

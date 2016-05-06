@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:integration="http://www.springframework.org/schema/integration"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="com.pranav.examples" />
+
+	<integration:channel id="inputChannel" />
+
+	<integration:channel id="customerInputChannel" />
+
+	<integration:channel id="tradeInputChannel" />
+
+	<integration:payload-type-router
+		input-channel="inputChannel">
+		<integration:mapping channel="customerInputChannel"
+			type="com.pranav.examples.pojo.Customer" />
+
+		<integration:mapping channel="tradeInputChannel"
+			type="com.pranav.examples.pojo.Trade" />
+
+	</integration:payload-type-router>
+
+	<integration:service-activator id="printServiceActivator"
+		input-channel="outputChannel" ref="printService" method="printPayload" />
+
+	<integration:header-enricher input-channel="customerInputChannel"
+		output-channel="outputChannel">
+		<integration:header name="PAYLOAD_TYPE" value="CUSTOMER" />
+	</integration:header-enricher>
+
+	<integration:header-enricher input-channel="tradeInputChannel"
+		output-channel="outputChannel">
+		<integration:header name="PAYLOAD_TYPE" value="TRADE" />
+	</integration:header-enricher>
+
+
+</beans>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:integration="http://www.springframework.org/schema/integration"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+	http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd  
+	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="com.pranav.examples" />
+
+	<task:executor id="executor" pool-size="5" />
+
+	<integration:channel id="customerRequestDispatcherChannel">
+		<integration:dispatcher task-executor="executor" />
+	</integration:channel>
+
+	<integration:gateway id="customerService"
+		service-interface="com.pranav.examples.gateway.CustomerService"
+		default-request-channel="customerRequestChannel"
+		default-reply-timeout="3000" />
+
+	<integration:channel id="customerRequestChannel" />
+
+	<integration:service-activator
+		input-channel="customerRequestChannel">
+		<beans:bean class="com.pranav.examples.gateway.CustomerServiceImpl" />
+	</integration:service-activator>
+
+	<integration:gateway id="customerServiceByDispatcher"
+		service-interface="com.pranav.examples.gateway.CustomerService"
+		default-request-channel="customerRequestDispatcherChannel"
+		default-reply-timeout="3000" />
+
+	<integration:service-activator
+		input-channel="customerRequestDispatcherChannel">
+		<beans:bean class="com.pranav.examples.gateway.CustomerServiceImpl" />
+	</integration:service-activator>
+</beans>
